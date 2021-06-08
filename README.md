@@ -10,5 +10,3 @@ For now, it is possible to build it in Android Studio and install in on a device
 This application is under MIT licence. It means that the user can use the code base as they please. 
 
 It does not contain any sensitive data. 
-
-Copyright 2021
