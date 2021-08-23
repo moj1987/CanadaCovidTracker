@@ -1,0 +1,8 @@
+change case
+change vaccination
+
+total case/ total recovery --> % recovery into circular graph
+
+total vacinations/ population
+
+
