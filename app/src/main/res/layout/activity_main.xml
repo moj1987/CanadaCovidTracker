@@ -34,6 +34,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="menu item 3" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -97,10 +98,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Total recovery" />
+                    android:text="Recovery percentage" />
 
                 <TextView
-                    android:id="@+id/totalToRecovery"
+                    android:id="@+id/total_to_recovery_percentage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -119,10 +120,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Vaccination percentage" />
+                    android:text="Fully Vaccinated percentage" />
 
                 <TextView
-                    android:id="@+id/vaccinationToPopulation"
+                    android:id="@+id/fully_vaccinated_percentage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintBottom_toBottomOf="parent"

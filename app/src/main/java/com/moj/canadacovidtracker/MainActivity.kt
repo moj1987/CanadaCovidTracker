@@ -13,11 +13,26 @@ class MainActivity : AppCompatActivity() {
     private val callBack = object : Callback<DataModel> {
         override fun onResponse(call: Call<DataModel>, response: Response<DataModel>) {
             val currentResponse = response.body()!!.data.get(0)
-            val canadaTotalPopulation: Double = 38020682.00
-            binding.changeCase.text = response.body()!!.data.get(0).change_cases.toString()
-            binding.changeVaccination.text = response.body()!!.data.get(0).change_vaccinations.toString()
-            binding.totalToRecovery.text = ((currentResponse.total_cases / currentResponse.total_recoveries)*100.00).toString()
-            binding.vaccinationToPopulation.text =((currentResponse.total_vaccinations/canadaTotalPopulation)*(100)).toString()
+            val lastUpdated = response.body()!!.last_updated
+            val totalCase = currentResponse.total_cases.toDouble()
+            val totalRecoveries = currentResponse.total_recoveries.toDouble()
+            val fullyVaccinated = currentResponse.total_vaccinated.toDouble()
+            val recoveriesPercentage: Double = totalRecoveries / totalCase * ONE_HUNDRES_PERCENT
+            val fullyVaccinatedPercentage: Double = fullyVaccinated / CANADA_POPULATION * ONE_HUNDRES_PERCENT
+            //New cases:
+            binding.changeCase.text = currentResponse.change_cases.toString()
+            //Deaths:
+            //TODO: add a field for deaths (change_fatalities)
+
+            //Hospitalized
+            //TODO: add a field for hospitalized(change hospitalizations)
+
+            //Doses administered today:
+            binding.changeVaccination.text = currentResponse.change_vaccinations.toString()
+
+            //binding.totalToRecoveryPercentage.text = recoveriesPercentage.toString()
+            binding.totalToRecoveryPercentage.text = String.format("%.2f", recoveriesPercentage)
+            binding.fullyVaccinatedPercentage.text = String.format("%.2f", fullyVaccinatedPercentage)
         }
 
         override fun onFailure(call: Call<DataModel>, t: Throwable) {
