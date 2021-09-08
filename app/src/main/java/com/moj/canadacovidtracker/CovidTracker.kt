@@ -9,4 +9,6 @@ interface CovidTracker {
         @GET("summary")
         fun getCurrentData() : Call<DataModel>
 
+        @GET("reports")
+        fun getAllData() : Call<DataModel>
 }
