@@ -2,8 +2,6 @@
 
 package com.moj.canadacovidtracker
 
-import java.util.*
-
 
 data class DataModel(
     val data: Array<Info>,
@@ -33,3 +31,7 @@ data class Info
     val total_vaccines_distributed: Int
 )
 
+data class RequiredInfo(
+    val latest_date: String,
+    val change_cases: Int,
+)

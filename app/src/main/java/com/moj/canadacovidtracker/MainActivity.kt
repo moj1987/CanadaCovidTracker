@@ -13,24 +13,29 @@ import com.moj.canadacovidtracker.databinding.ActivityMainBinding
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.*
+import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
-    lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
     private lateinit var linechart: LineChart
-    private var scoreList = ArrayList<Score>()
+    private var lastWeekData = ArrayList<RequiredInfo>()
 
     private val networkService = getNetworkServiceInstance()
     private val callBack = object : Callback<DataModel> {
         override fun onResponse(call: Call<DataModel>, response: Response<DataModel>) {
-            val currentResponse = response.body()!!.data.get(0)
+            getLastWeekData(response.body()!!.data.takeLast(SEVEN_DAYS_OF_A_WEEK))
+            initLineChart()
+            setChartValues()
+            val currentDayData = response.body()!!.data.last()
             val lastUpdated = response.body()!!.last_updated
-            val totalCase = currentResponse.total_cases.toDouble()
-            val totalRecoveries = currentResponse.total_recoveries.toDouble()
-            val fullyVaccinated = currentResponse.total_vaccinated.toDouble()
-            val recoveriesPercentage: Double = totalRecoveries / totalCase * ONE_HUNDRES_PERCENT
-            val fullyVaccinatedPercentage: Double = fullyVaccinated / CANADA_POPULATION * ONE_HUNDRES_PERCENT
+            val totalCase = currentDayData.total_cases.toDouble()
+            val totalRecoveries = currentDayData.total_recoveries.toDouble()
+            val fullyVaccinated = currentDayData.total_vaccinated.toDouble()
+            val recoveriesPercentage: Double = totalRecoveries / totalCase * ONE_HUNDREDS_PERCENT
+            val fullyVaccinatedPercentage: Double = fullyVaccinated / CANADA_POPULATION * ONE_HUNDREDS_PERCENT
             //New cases:
-            binding.changeCase.text = currentResponse.change_cases.toString()
+            binding.changeCase.text = currentDayData.change_cases.toString()
             //Deaths:
             //TODO: add a field for deaths (change_fatalities)
 
@@ -38,7 +43,7 @@ class MainActivity : AppCompatActivity() {
             //TODO: add a field for hospitalized(change_hospitalizations)
 
             //Doses administered today:
-            binding.changeVaccination.text = currentResponse.change_vaccinations.toString()
+            binding.changeVaccination.text = currentDayData.change_vaccinations.toString()
 
             //binding.totalToRecoveryPercentage.text = recoveriesPercentage.toString()
             binding.totalToRecoveryPercentage.text = String.format("%.2f", recoveriesPercentage)
@@ -48,8 +53,15 @@ class MainActivity : AppCompatActivity() {
         override fun onFailure(call: Call<DataModel>, t: Throwable) {
             binding.changeCase.text = t.toString()
         }
+    }
+
+    private fun getLastWeekData(data: List<Info>) {
+        val currentDayOfWeek = Calendar.DAY_OF_WEEK
 
 
+        data.forEachIndexed {index,i->
+            lastWeekData.add(RequiredInfo( (Calendar.DATE+index).toString()    , i.change_cases))
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,11 +69,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        networkService.getData(callBack)
-
+        // networkService.getData(callBack)
+        networkService.getAllData(callBack)
         linechart = binding.lineChart
-        initLineChart()
-        setChartValues()
     }
 
     private fun getNetworkServiceInstance(): NetworkService {
@@ -71,38 +81,22 @@ class MainActivity : AppCompatActivity() {
     private fun setChartValues() {
         val enteries: ArrayList<Entry> = ArrayList()
 
-        scoreList.add(Score("John1", 12))
-        scoreList.add(Score("John2", 1))
-        scoreList.add(Score("John3", 2))
-        scoreList.add(Score("John4", 6))
-        scoreList.add(Score("John5", 3))
-        scoreList.add(Score("John6", 7))
+        /* lastWeekData.add(RequiredInfo("John1", 12))
+         lastWeekData.add(RequiredInfo("John2", 1))
+         lastWeekData.add(RequiredInfo("John3", 2))
+         lastWeekData.add(RequiredInfo("John4", 6))
+         lastWeekData.add(RequiredInfo("John5", 3))
+         lastWeekData.add(RequiredInfo("John6", 7))*/
 
-        for (i in scoreList.indices) {
-            val score = scoreList[i]
-            enteries.add(Entry(i.toFloat(), score.score.toFloat()))
+        for (i in lastWeekData.indices) {
+            val score = lastWeekData[i]
+            enteries.add(Entry(i.toFloat(), score.change_cases.toFloat()))
         }
+
         val lineDataSet = LineDataSet(enteries, "")
-
-
-        /* val xValues = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-         val yValues = listOf(
-
-             BarEntry(4f, 0f),
-             BarEntry(3f, 0f),
-             BarEntry(5f, 0f),
-             BarEntry(1f, 0f),
-             BarEntry(2.2f, 0f),
-             BarEntry(14f, 0f),
-             BarEntry(4.3f, 0f)
-         )
-         val barDataSet = LineDataSet(yValues, "Week days")
- */
 
         val data = LineData(lineDataSet)
         binding.lineChart.data = data
-
-
     }
 
     data class Score(
@@ -110,11 +104,11 @@ class MainActivity : AppCompatActivity() {
         val score: Int
     )
 
-    inner class MyAxisFromatter : IndexAxisValueFormatter() {
+    inner class MyAxisFormatter : IndexAxisValueFormatter() {
         override fun getAxisLabel(value: Float, axis: AxisBase?): String {
             val index = value.toInt()
-            return if (index < scoreList.size) {
-                scoreList[index].name
+            return if (index < lastWeekData.size) {
+                lastWeekData[index].latest_date
             } else {
                 ""
             }
@@ -134,10 +128,10 @@ class MainActivity : AppCompatActivity() {
         binding.lineChart.animateXY(30, 2000)
 
         xAxis.position = XAxis.XAxisPosition.BOTTOM_INSIDE
-        xAxis.valueFormatter = MyAxisFromatter()
+        xAxis.valueFormatter = MyAxisFormatter()
         xAxis.setDrawLabels(true)
         xAxis.granularity = 1f
-        //xAxis.labelRotationAngle = +90f
-
     }
+val WeekDays = mapOf<>{(1,"Monday"),
+    (2,"Tuesday")}
 }
