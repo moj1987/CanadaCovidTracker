@@ -13,6 +13,7 @@ import com.moj.canadacovidtracker.databinding.ActivityMainBinding
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -24,7 +25,7 @@ class MainActivity : AppCompatActivity() {
     private val networkService = getNetworkServiceInstance()
     private val callBack = object : Callback<DataModel> {
         override fun onResponse(call: Call<DataModel>, response: Response<DataModel>) {
-            getLastWeekData(response.body()!!.data.takeLast(SEVEN_DAYS_OF_A_WEEK))
+            getLastWeekData(response.body()!!.data.takeLast(Calendar.DAY_OF_WEEK))
             initLineChart()
             setChartValues()
             val currentDayData = response.body()!!.data.last()
@@ -55,21 +56,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getLastWeekData(data: List<Info>) {
-        val currentDayOfWeek = Calendar.DAY_OF_WEEK
-
-
-        data.forEachIndexed {index,i->
-            lastWeekData.add(RequiredInfo( (Calendar.DATE+index).toString()    , i.change_cases))
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // networkService.getData(callBack)
         networkService.getAllData(callBack)
         linechart = binding.lineChart
     }
@@ -78,19 +69,21 @@ class MainActivity : AppCompatActivity() {
         return NetworkServiceImpl()
     }
 
+    private fun getLastWeekData(data: List<Info>) {
+        data.asReversed().forEachIndexed { index, i ->
+            val dayOfWeek = getDayOfWeek(data[index].date)
+            val changeCases = data[index].change_cases
+
+            lastWeekData.add(RequiredInfo(dayOfWeek, changeCases))
+        }
+    }
+
     private fun setChartValues() {
         val enteries: ArrayList<Entry> = ArrayList()
 
-        /* lastWeekData.add(RequiredInfo("John1", 12))
-         lastWeekData.add(RequiredInfo("John2", 1))
-         lastWeekData.add(RequiredInfo("John3", 2))
-         lastWeekData.add(RequiredInfo("John4", 6))
-         lastWeekData.add(RequiredInfo("John5", 3))
-         lastWeekData.add(RequiredInfo("John6", 7))*/
-
         for (i in lastWeekData.indices) {
             val score = lastWeekData[i]
-            enteries.add(Entry(i.toFloat(), score.change_cases.toFloat()))
+            enteries.add(Entry(i.toFloat(), score.changeCases.toFloat()))
         }
 
         val lineDataSet = LineDataSet(enteries, "")
@@ -99,16 +92,11 @@ class MainActivity : AppCompatActivity() {
         binding.lineChart.data = data
     }
 
-    data class Score(
-        val name: String,
-        val score: Int
-    )
-
     inner class MyAxisFormatter : IndexAxisValueFormatter() {
         override fun getAxisLabel(value: Float, axis: AxisBase?): String {
             val index = value.toInt()
             return if (index < lastWeekData.size) {
-                lastWeekData[index].latest_date
+                lastWeekData[index].date
             } else {
                 ""
             }
@@ -125,13 +113,17 @@ class MainActivity : AppCompatActivity() {
         linechart.description.isEnabled = false
 
         binding.lineChart.setBackgroundColor(resources.getColor(R.color.purple_200))
-        binding.lineChart.animateXY(30, 2000)
+        binding.lineChart.animateXY(30, 1000)
 
         xAxis.position = XAxis.XAxisPosition.BOTTOM_INSIDE
         xAxis.valueFormatter = MyAxisFormatter()
         xAxis.setDrawLabels(true)
         xAxis.granularity = 1f
     }
-val WeekDays = mapOf<>{(1,"Monday"),
-    (2,"Tuesday")}
+
+    private fun getDayOfWeek(date: String): String {
+        val formatter = SimpleDateFormat("E", Locale.getDefault())
+        val currentDate = SimpleDateFormat("yyyy-MM-dd").parse(date) ?: "1900-01-01"
+        return formatter.format(currentDate)
+    }
 }

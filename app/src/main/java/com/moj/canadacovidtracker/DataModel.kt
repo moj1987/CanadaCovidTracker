@@ -10,7 +10,7 @@ data class DataModel(
 
 data class Info
     (
-    val latest_date: String,
+    val date: String,
     val change_cases: Int,
     val change_fatalities: Int,
     val change_tests: Int,
@@ -32,6 +32,6 @@ data class Info
 )
 
 data class RequiredInfo(
-    val latest_date: String,
-    val change_cases: Int,
+    val date: String,
+    val changeCases: Int,
 )
