@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">CanadaCovidTracker</string>
-    <string name="covid">Covid</string>
+    <string name="covid">Canada Covid-19 Tracker</string>
 </resources>
