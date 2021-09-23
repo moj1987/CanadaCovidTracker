@@ -2,6 +2,7 @@ package com.moj.canadacovidtracker
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.XAxis
@@ -122,7 +123,7 @@ class MainActivity : AppCompatActivity() {
         linechart.legend.isEnabled = false
         linechart.description.isEnabled = false
 
-        binding.lineChart.setBackgroundColor(resources.getColor(R.color.purple_200))
+        binding.lineChart.setBackgroundColor(ContextCompat.getColor(applicationContext, R.color.purple_200))
         binding.lineChart.animateXY(30, 1000)
 
         xAxis.position = XAxis.XAxisPosition.BOTTOM_INSIDE
