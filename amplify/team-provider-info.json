@@ -10,6 +10,11 @@
       "StackName": "amplify-canadacovidtracker-dev-91536",
       "StackId": "arn:aws:cloudformation:us-east-1:624622221797:stack/amplify-canadacovidtracker-dev-91536/bad2df40-a145-11ec-93dc-128414620bbd",
       "AmplifyAppId": "d1gm87estko6fb"
+    },
+    "categories": {
+      "auth": {
+        "canadacovidtracker331b63cf": {}
+      }
     }
   }
 }

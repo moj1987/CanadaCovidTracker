@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.amplifyframework.AmplifyException
+import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
 import com.amplifyframework.core.Amplify
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.AxisBase
@@ -54,8 +55,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun initAmplify() {
         try {
+            Amplify.addPlugin(AWSCognitoAuthPlugin())
             Amplify.configure(applicationContext)
             Log.i("Amplify", "Amplify initialized")
+            Amplify.Auth.fetchAuthSession(
+                { Log.i("AmplifyQuickstart", "Auth session = $it") },
+                { error -> Log.e("AmplifyQuickstart", "Failed to fetch auth session", error) }
+            )
         } catch (error: AmplifyException) {
             Log.e("Amplify", "Could not initialize Amplify", error)
         }
