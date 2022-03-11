@@ -1,8 +1,11 @@
 package com.moj.canadacovidtracker
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.amplifyframework.AmplifyException
+import com.amplifyframework.core.Amplify
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.XAxis
@@ -16,7 +19,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -45,6 +48,17 @@ class MainActivity : AppCompatActivity() {
 
         networkService.getAllData(callBack)
         linechart = binding.lineChart
+
+        initAmplify()
+    }
+
+    private fun initAmplify() {
+        try {
+            Amplify.configure(applicationContext)
+            Log.i("Amplify", "Amplify initialized")
+        } catch (error: AmplifyException) {
+            Log.e("Amplify", "Could not initialize Amplify", error)
+        }
     }
 
     private fun getNetworkServiceInstance(): NetworkService {
@@ -53,7 +67,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setTodayValues(response: Response<DataModel>) {
         val currentDayData = response.body()!!.data.last()
-        val lastUpdated = response.body()!!.last_updated
+        //val lastUpdated = response.body()!!.last_updated
         val totalCase = currentDayData.total_cases.toDouble()
         val totalRecoveries = currentDayData.total_recoveries.toDouble()
         val fullyVaccinated = currentDayData.total_vaccinated.toDouble()
@@ -79,7 +93,7 @@ class MainActivity : AppCompatActivity() {
     private fun getLastWeekData(response: Response<DataModel>): ArrayList<RequiredInfo> {
         val data = response.body()!!.data.takeLast(Calendar.DAY_OF_WEEK)
         val lastWeekData = ArrayList<RequiredInfo>()
-        data.asReversed().forEachIndexed { index, i ->
+        data.asReversed().forEachIndexed { index, _ ->
             val dayOfWeek = getDayOfWeek(data[index].date)
             val changeCases = data[index].change_cases
 
